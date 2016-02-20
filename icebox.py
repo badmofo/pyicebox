@@ -38,6 +38,8 @@ def lookup(addr):
     ''' Returns balance and nonce. '''
     # TODO: beware balance is int but nonce is string
     # TODO: use instead https://etherchain.org/api/account/multiple/:ids
+    if not addr.startswith('0x'): # etherchain api requires the 0x prefix
+        addr = '0x' + addr
     data = requests.get('https://etherchain.org/api/account/%s' % addr).json()['data']
     if data:
         return data[0]
