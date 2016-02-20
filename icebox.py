@@ -93,7 +93,7 @@ if __name__ == '__main__':
         print('Mnemonic: %s' % mnemonic)
         #print('HDPublicKey: %s' % bip32_privtopub(hd_privkey))
         print('-' * 40)
-        for i,(privkey,addr) in enumerate(mnemonic_to_hdkey(hd_privkey)):
+        for i,(privkey,addr) in enumerate(derive_keypairs(hd_privkey)):
             print('Address #%d: 0x%s' % (i, addr))
     elif command == 'keys':
         mnemonic = getpass.getpass('Enter mnemonic:').strip()
