@@ -1,6 +1,7 @@
 from __future__ import print_function
 from bitcoin import bip32_master_key, bip32_ckd, bip32_descend, bip32_privtopub, encode_privkey
 import json
+import datetime
 import ethereum.keys
 import ethereum.transactions
 from ethereum.utils import decode_addr, decode_hex, encode_hex
@@ -51,9 +52,10 @@ def send(privkey, nonce, recipient, amount_wei, gas_price_wei, gas_limit=21000):
     
 def export_keystore(privkey, password):
     content = ethereum.keys.make_keystore_json(privkey, password)
-    print(content)
+    addr = decode_addr(ethereum.keys.privtoaddr(privkey)).decode('utf-8')
+    content['address'] = addr
     content_json = json.dumps(content, indent=4)
-    filename = content["id"] + '.json'
+    filename = 'UTC--%s000Z--%s' % (datetime.datetime.utcnow().isoformat(), addr)
     return filename, content_json
 
 def test_send():
