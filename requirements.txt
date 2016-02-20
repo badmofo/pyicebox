@@ -1,0 +1,4 @@
+bitcoin>=1.1.42
+ethereum>=1.0.8
+mnemonic>=0.12
+requests>=2.9.1
