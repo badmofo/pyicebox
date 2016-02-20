@@ -1,5 +1,5 @@
 from __future__ import print_function
-import bitcoin
+from bitcoin import bip32_master_key, bip32_ckd, bip32_descend, bip32_privtopub, encode_privkey
 import json
 import ethereum.keys
 import ethereum.transactions
@@ -8,18 +8,21 @@ import requests
 from mnemonic import Mnemonic
 from rlp import encode
 
-def mnemonic_to_hdkey(mnemonic, keys=3):
+def mnemonic_to_hdkey(mnemonic):
     # if we wanted to avoid the mnemonic dep we could just do: 
     #  pbkdf2_hmac('sha512', mnemonic, 'mnemonic', 2048).encode('hex')
     # to get the seed
     if not Mnemonic('english').check(mnemonic):
         raise Exception('invalid mnemonic')
     seed = Mnemonic('english').to_seed(mnemonic)
-    hd_root = bitcoin.bip32_master_key(seed)
-    wallet_path = [2**31, 2**31, 2**31]
-    keypairs = []
+    hd_root = bip32_master_key(seed)
+    # path is m/0'/0'/0'
+    return bip32_ckd(bip32_ckd(bip32_ckd(hd_root, 2**31), 2**31), 2**31)
+    
+def derive_keypairs(hd_key, keys=3):
+    keypairs = []    
     for i in range(keys):
-        privkey = bitcoin.encode_privkey(bitcoin.bip32_descend(hd_root, wallet_path + [i]), 'hex')
+        privkey = encode_privkey(bip32_descend(hd_key, [i]), 'hex')
         addr = decode_addr(ethereum.keys.privtoaddr(privkey)).decode('utf-8')
         keypairs.append((privkey, addr))
     return keypairs
@@ -86,13 +89,17 @@ if __name__ == '__main__':
         print('Nonce:', info['nonce'])
     elif command == 'create':
         mnemonic = create_mnemonic()
+        hd_privkey = mnemonic_to_hdkey(mnemonic)
         print('Mnemonic: %s' % mnemonic)
+        #print('HDPublicKey: %s' % bip32_privtopub(hd_privkey))
         print('-' * 40)
-        for i,(privkey,addr) in enumerate(mnemonic_to_hdkey(mnemonic)):
+        for i,(privkey,addr) in enumerate(mnemonic_to_hdkey(hd_privkey)):
             print('Address #%d: 0x%s' % (i, addr))
     elif command == 'keys':
         mnemonic = getpass.getpass('Enter mnemonic:').strip()
-        for i,(privkey,addr) in enumerate(mnemonic_to_hdkey(mnemonic)):
+        hd_privkey = mnemonic_to_hdkey(mnemonic)
+        #print('HDPublicKey: %s' % bip32_privtopub(hd_privkey))
+        for i,(privkey,addr) in enumerate(derive_keypairs(hd_privkey)):
             print('Address #%d: 0x%s    Privkey: %s' % (i, addr, privkey))
     elif command == 'send':
         privkey_hex = getpass.getpass('Enter privkey:')
@@ -127,11 +134,11 @@ if __name__ == '__main__':
         Generate a new icebox wallet.
         
     keys
-        Displays the private addresses and private keys for a wallet.
+        Displays the addresses and private keys for a wallet.
         NOTE: This command will prompt you for your mnemonic.
         
     gas
-        Shows the current gas price in wei (must be online).
+        Shows the current gas price in WEI (must be online).
         
     lookup <addr>
         Shows the current balance and nonce given an address (must be online).
@@ -140,7 +147,7 @@ if __name__ == '__main__':
         Creates a send transaction (but does not broadcast it).
         NOTE: This command will prompt you for the private key to send from.
         Amount should be specified in ETHERs.
-        Gas price should be specified in wei.
+        Gas price should be specified in WEI.
         Gas limit for simple sends should be set to 21000.
         
     export

@@ -16,11 +16,11 @@ Command Help:
         Generate a new icebox wallet.
         
     keys
-        Displays the private addresses and private keys for a wallet.
+        Displays the addresses and private keys for a wallet.
         NOTE: This command will prompt you for your mnemonic.
         
     gas
-        Shows the current gas price in wei (must be online).
+        Shows the current gas price in WEI (must be online).
         
     lookup <addr>
         Shows the current balance and nonce given an address (must be online).
@@ -29,7 +29,7 @@ Command Help:
         Creates a send transaction (but does not broadcast it).
         NOTE: This command will prompt you for the private key to send from.
         Amount should be specified in ETHERs.
-        Gas price should be specified in wei.
+        Gas price should be specified in WEI.
         Gas limit for simple sends should be set to 21000.
         
     export
