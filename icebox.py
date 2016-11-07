@@ -89,7 +89,7 @@ if __name__ == '__main__':
     elif command == 'lookup':
         addr = sys.argv[2]
         info = lookup(addr)
-        print('Balance: %s ETH' % (info['balance']/Decimal(1000000000000000000)))
+        print('Balance: %s ETH' % (Decimal(info['balance'])/Decimal(1000000000000000000)))
         print('Nonce:', info['nonce'])
     elif command == 'create':
         mnemonic = create_mnemonic()
